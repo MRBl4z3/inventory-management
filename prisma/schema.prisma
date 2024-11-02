@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  Admin
+  SuperAdmin
+  Petugas
+}
+
+model User {
+  id       String   @id @default(uuid())
+  nik      String   @unique
+  name     String
+  phone    String
+  username String   @unique
+  role     UserRole
+  password String
+}
+
+model Barang {
+  id           String         @id @default(uuid())
+  code         String
+  name         String
+  jumlah       Int
+  jenisId      String
+  satuanId     String
+  jenis        JenisBarang    @relation(fields: [jenisId], references: [id])
+  unit         Unit           @relation(fields: [satuanId], references: [id])
+  barangMasuk  BarangMasuk[]
+  barangKeluar BarangKeluar[]
+}
+
+model JenisBarang {
+  id     String   @id @default(uuid())
+  name   String
+  Barang Barang[]
+}
+
+model Unit {
+  id     String   @id @default(uuid())
+  name   String
+  Barang Barang[]
+}
+
+model Supplier {
+  id          String        @id @default(uuid())
+  code        String        @unique
+  name        String
+  address     String
+  phone       String
+  barangMasuk BarangMasuk[]
+}
+
+model Pembeli {
+  id           String         @id @default(uuid())
+  code         String         @unique
+  name         String
+  address      String
+  phone        String
+  barangKeluar BarangKeluar[]
+}
+
+model BarangMasuk {
+  id         String   @id @default(uuid())
+  jumlah     Int
+  date       DateTime
+  barangId   String
+  supplierId String
+  barang     Barang   @relation(fields: [barangId], references: [id])
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+}
+
+model BarangKeluar {
+  id        String   @id @default(uuid())
+  jumlah    Int
+  date      DateTime
+  barangId  String
+  pembeliId String
+  barang    Barang   @relation(fields: [barangId], references: [id])
+  pembeli   Pembeli  @relation(fields: [pembeliId], references: [id])
+}
